@@ -14,19 +14,16 @@ import java.util.List;
 public class  PersonController {
 
     @Autowired
-    private PersonRepository repository;
-
-    @Autowired
     private PersonService service;
 
     @GetMapping("/person")
     public Iterable<Person> getPerson() {
-        return repository.findAll();
+        return service.getAllPersons();
     }
 
     @PostMapping("/person")
     public Person addPerson(@RequestBody Person person) {
-        return repository.save(person);
+        return service.addPerson(person);
     }
 
     @GetMapping("/person/{id}")
@@ -50,8 +47,13 @@ public class  PersonController {
     }
 
     @DeleteMapping("/person/{id}")
-    public void deletePerson(@PathVariable("id") int id) {
-        repository.deleteById(id);
+    public ResponseEntity<?> deletePerson(@PathVariable("id") int id) {
+        try {
+            service.deletePersonById(id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("person/{id}/message")
@@ -74,7 +76,7 @@ public class  PersonController {
         }
     }
 
-    @GetMapping("/person/{id}/messages/")
+    @GetMapping("/person/{id}/message")
     public ResponseEntity<?> getPersonMessages(@PathVariable("id") int id) {
         try {
             List<Message> messages = service.getAllMessages(id);
